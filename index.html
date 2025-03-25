@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Puzzle Challenge</title>
+    <link rel="icon" type="image/png" href="src/assets/images/favicon.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <script src="src/objects/PhysicsObject.js"></script>
+    <script src="src/objects/Player.js"></script>
+    <script src="src/scenes/MainScene.js"></script>
+    <script src="src/scenes/LevelScene.js"></script>
+    <script>
+        // Game configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            physics: {
+                default: 'matter',
+                matter: {
+                    gravity: { y: 1 },
+                    debug: false,
+                    enableSleeping: true,
+                    timeScale: 1,
+                    positionIterations: 6,
+                    velocityIterations: 4,
+                    constraintIterations: 2
+                }
+            },
+            fps: {
+                target: 60,
+                forceSetTimeOut: true
+            },
+            scene: [MainScene, LevelScene]
+        };
+
+        // Initialize the game
+        const game = new Phaser.Game(config);
+
+        // Global game settings
+        const GAME = {
+            // Number of levels in the game
+            TOTAL_LEVELS: 10,
+            
+            // Current level the player is on
+            currentLevel: 1,
+            
+            // Player progress
+            levelsCompleted: 0,
+            
+            // Difficulty progression factors
+            getDifficultyFactor: function() {
+                return 1 + (this.currentLevel * 0.2);
+            },
+            
+            // Level completion callback
+            completeLevel: function() {
+                this.levelsCompleted = Math.max(this.levelsCompleted, this.currentLevel);
+                this.currentLevel++;
+                if (this.currentLevel > this.TOTAL_LEVELS) {
+                    game.scene.start('MainScene', { gameCompleted: true });
+                } else {
+                    game.scene.start('LevelScene', { level: this.currentLevel });
+                }
+            },
+            
+            // Reset the game
+            resetGame: function() {
+                this.currentLevel = 1;
+                this.levelsCompleted = 0;
+                game.scene.start('MainScene');
+            }
+        };
+    </script>
+</body>
+</html>
